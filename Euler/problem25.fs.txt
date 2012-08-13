@@ -1,0 +1,74 @@
+﻿
+let listOfZeroes length =
+    [1..length] |> Seq.map(fun _ -> 0) |> Seq.toList
+
+let addBigNumsOfEqualLength (x: int list) (y: int list) carry =
+    // Add padded zeroes so we have somewhere for the carry to go
+    let xPadded = x @ [0]
+    let yPadded = y @ [0]
+
+    let folder (result, carry) (u, v) =
+        let sum = u + v + carry
+        let emittedDigit = sum % 10
+        let resultingCarry = sum / 10
+
+        (emittedDigit, resultingCarry)
+
+    Seq.zip xPadded yPadded
+    |> Seq.scan folder (0, carry)
+    |> Seq.skip(1)
+    |> Seq.map (fun (u, v) -> u)
+    |> Seq.toList
+    |> List.rev
+    |> Seq.skipWhile(fun z -> z = 0)
+    |> Seq.toList
+    |> List.rev
+
+let addBigNums (x: int list) (y: int list) =
+    // First of all, make the two bignums have equal number of digits by sticking 0s in front of the shorter one.
+    let xIsShorter = x.Length < y.Length
+
+    let zeroes = listOfZeroes (System.Math.Abs(y.Length - x.Length))
+    
+    let paddedX = 
+        if xIsShorter then 
+            x @ zeroes
+        else
+            x
+
+    let paddedY =
+        if not xIsShorter then
+            y @ zeroes
+        else
+            y
+
+    addBigNumsOfEqualLength paddedX paddedY 0
+    
+let bigNumToString bigNum =
+    let a =
+        bigNum
+        |> Seq.toList
+        |> List.rev
+        |> List.map (fun x -> x.ToString().Chars(0))
+    
+    new System.String(List.toArray(a))
+
+let rec intToBigNum i state =
+    match i with
+    | x when x > 9 -> intToBigNum (x / 10) (state @  [x % 10])
+    | x -> state @ [x]   
+
+let rec fibTillYouDrop x y dropAtDigitCount indexCounter =
+    if List.length(y) >= dropAtDigitCount then
+        indexCounter
+    else
+        fibTillYouDrop y (addBigNums x y) dropAtDigitCount (indexCounter + 1)
+    
+
+[<EntryPoint>]
+let main argv = 
+    let index = fibTillYouDrop [0] [1] 1000 1
+
+    printfn "%A" (index + 0)
+
+    0

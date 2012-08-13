@@ -1,0 +1,52 @@
+﻿// Learn more about F# at http://fsharp.net
+// See the 'F# Tutorial' project for more help.
+
+let isDivisorOf x y =
+    x % y = 0
+
+let divisorsOf x =
+    [1..x / 2]
+    |> Seq.where(fun z -> (isDivisorOf x z))
+
+let findTupleByFirstValue sequence value =
+    sequence
+    |> Seq.tryFind(fun (x, _) -> x = value)
+
+let mainProblem20 argv = 
+    let factorizations =
+        [1..10000]
+        |> Seq.map(fun x -> (x, Seq.toList(divisorsOf x)))
+        |> Seq.toList
+
+    printfn "Factorizations: %A" factorizations
+
+    let friends =
+        factorizations
+        |> Seq.map(fun (x, y) -> (x, Seq.sum(y)))
+        |> Seq.toList
+
+    printfn "Numbers and their friends: %A" friends
+
+    let friendsAndTheirFriends =
+        friends
+        |> Seq.map(fun (x, y) -> (x, y, findTupleByFirstValue friends y))
+        |> Seq.toList
+
+    printfn "Numbers and their friends and their friends' friends %A" friendsAndTheirFriends
+    
+    let amicableNumbersWithTheirPair =
+        friendsAndTheirFriends
+        |> Seq.where(
+            fun (x, y, z) -> 
+                match z with
+                | None -> false
+                | Some(u, v) -> x <> y && x = v) // "x <> y" because a number that is its own friend is not an amicable number (e.g. 6 factors to 1, 2, 3, which sum to 6, so its friend is 6, itself, so it's not an amicable number)
+        |> Seq.map(fun (x, y, _) -> (x, y))
+
+    printfn "Amicable numbers, each with their pair:"
+    printfn "%A" amicableNumbersWithTheirPair
+    `
+    printfn ""
+    printfn "Sum of amicable numbers: %A" (amicableNumbersWithTheirPair |> Seq.map(fun (x, _) -> x) |> Seq.sum)
+
+    0 // return an integer exit code

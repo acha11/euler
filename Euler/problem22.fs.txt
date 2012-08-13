@@ -1,0 +1,21 @@
+﻿let score (x: string) =
+    x.ToCharArray()
+    |> Seq.fold (fun x y -> x + (int y) - (int 'A') + 1) 0
+
+[<EntryPoint>]
+let main argv = 
+    let x  = 
+        System.IO.File.ReadAllText("..\..\problem22.input.txt").Split([| ',' |])
+        |> Seq.map (fun x -> x.Substring(1, x.Length - 2))
+        |> Seq.sort
+//        |> Seq.mapi (fun index x -> (index, x, (score x), (index + 1) * (score x)))
+        |> Seq.mapi (fun index x -> (index + 1) * (score x))
+        |> Seq.toList
+
+    let sumOfScoreTimesPosition = 
+        x
+        |> Seq.sum
+ 
+    printfn "%A" sumOfScoreTimesPosition
+
+    0

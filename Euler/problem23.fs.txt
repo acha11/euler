@@ -1,0 +1,53 @@
+﻿let isDivisorOf x y =
+    x % y = 0
+
+let divisorsOf x =
+    [1..x / 2]
+    |> Seq.where(fun z -> (isDivisorOf x z))
+
+let sumOfDivisorsOf x =
+    divisorsOf x
+    |> Seq.sum
+
+let cart xs ys =
+    seq {
+        for x in xs do
+            for y in ys do
+                yield (x, y)            
+    }
+
+[<EntryPoint>]
+let main argv = 
+    let max = 28123
+
+    let halfMax = max / 2 + 1
+
+    let abundantNumbers =
+        [1..max]
+        |> Seq.map(fun x -> (x, (sumOfDivisorsOf x)))
+        |> Seq.where(fun (x, y) -> x < y)
+        |> Seq.map(fun (x, y) -> x)
+        |> Seq.toList
+
+    printfn "Abundant: %A %A" abundantNumbers.Length abundantNumbers
+
+    let producable = 
+        (cart abundantNumbers abundantNumbers)
+        |> Seq.map (fun (x, y) -> x + y)
+        |> Seq.where (fun x -> x <= max)
+        |> Seq.distinct
+        |> Seq.toList
+
+    printfn "Pairs: %A %A" (producable |> Seq.length) producable
+
+    let sum = (max + 1) * max / 2
+
+    printfn "Sum: %A" sum
+
+    let sumOfUnproducable =
+        sum - (producable |> Seq.sum)
+
+    printfn "Unproducable: %A" sumOfUnproducable
+        
+    0 // return an integer exit code
+    
